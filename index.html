@@ -1,0 +1,690 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CloudDora - Data Insights Platform | Powered by Claude AI</title>
+    <link rel="icon" type="image/png" href="https://data-analysis-platform-frontend-360783618622.s3.eu-central-1.amazonaws.com/CloudDora+Logo+1.png">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1d4ed8;
+            --secondary: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --bg-light: #f8fafc;
+            --bg-white: #ffffff;
+            --text-dark: #1e293b;
+            --text-muted: #64748b;
+            --border: #e2e8f0;
+            --shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1);
+            --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: var(--text-dark);
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        /* Header */
+        .header {
+            text-align: center;
+            margin-bottom: 3rem;
+            animation: fadeIn 0.8s ease-in;
+        }
+
+        .logo {
+            width: 120px;
+            height: 120px;
+            margin: 0 auto 1.5rem;
+            background: white;
+            border-radius: 20px;
+            padding: 1rem;
+            box-shadow: var(--shadow-lg);
+        }
+
+        .logo img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            color: white;
+            margin-bottom: 0.5rem;
+            font-weight: 700;
+        }
+
+        .subtitle {
+            font-size: 1.2rem;
+            color: rgba(255, 255, 255, 0.9);
+            font-weight: 300;
+        }
+
+        /* Main Card */
+        .main-card {
+            background: var(--bg-white);
+            border-radius: 16px;
+            box-shadow: var(--shadow-lg);
+            padding: 2.5rem;
+            animation: slideUp 0.8s ease-out;
+        }
+
+        /* Upload Zone */
+        .upload-zone {
+            border: 3px dashed var(--border);
+            border-radius: 12px;
+            padding: 3rem;
+            text-align: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            background: var(--bg-light);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .upload-zone:hover {
+            border-color: var(--primary);
+            background: rgba(37, 99, 235, 0.05);
+            transform: translateY(-2px);
+        }
+
+        .upload-zone.dragover {
+            border-color: var(--primary);
+            background: rgba(37, 99, 235, 0.1);
+            transform: scale(1.02);
+        }
+
+        .upload-icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            color: var(--primary);
+        }
+
+        .upload-text {
+            font-size: 1.2rem;
+            color: var(--text-dark);
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+
+        .upload-subtext {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+        }
+
+        #fileInput {
+            display: none;
+        }
+
+        /* Button */
+        .btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 0.875rem 2rem;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: var(--shadow);
+            display: inline-block;
+        }
+
+        .btn:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .btn:disabled {
+            background: var(--text-muted);
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-secondary {
+            background: var(--secondary);
+            margin-left: 1rem;
+        }
+
+        /* File Info */
+        .file-info {
+            margin-top: 1.5rem;
+            padding: 1.5rem;
+            background: var(--bg-light);
+            border-radius: 8px;
+            border-left: 4px solid var(--primary);
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        .file-name {
+            font-weight: 600;
+            color: var(--text-dark);
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .file-size {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        /* Status */
+        .status {
+            margin-top: 1.5rem;
+            padding: 1rem;
+            border-radius: 8px;
+            font-weight: 500;
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        .status.loading {
+            background: rgba(37, 99, 235, 0.1);
+            color: var(--primary);
+            border: 1px solid var(--primary);
+        }
+
+        .status.success {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--secondary);
+            border: 1px solid var(--secondary);
+        }
+
+        .status.error {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--danger);
+            border: 1px solid var(--danger);
+        }
+
+        /* Loading Spinner */
+        .spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(37, 99, 235, 0.3);
+            border-radius: 50%;
+            border-top-color: var(--primary);
+            animation: spin 1s linear infinite;
+            margin-right: 0.5rem;
+            vertical-align: middle;
+        }
+
+        /* Insights Section */
+        .insights {
+            margin-top: 2rem;
+            animation: fadeIn 0.8s ease-in;
+        }
+
+        .insights-header {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid var(--border);
+        }
+
+        .insights-header h2 {
+            font-size: 1.75rem;
+            color: var(--text-dark);
+        }
+
+        .badge {
+            background: var(--secondary);
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 12px;
+            font-size: 0.875rem;
+            font-weight: 600;
+        }
+
+        .insight-card {
+            background: var(--bg-light);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            border-left: 4px solid var(--primary);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .insight-card:hover {
+            transform: translateX(4px);
+            box-shadow: var(--shadow);
+        }
+
+        .insight-card h3 {
+            color: var(--primary);
+            margin-bottom: 0.75rem;
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .insight-list {
+            list-style: none;
+        }
+
+        .insight-list li {
+            padding: 0.5rem 0;
+            padding-left: 1.5rem;
+            position: relative;
+            color: var(--text-dark);
+        }
+
+        .insight-list li:before {
+            content: "→";
+            position: absolute;
+            left: 0;
+            color: var(--primary);
+            font-weight: bold;
+        }
+
+        .summary-text {
+            font-size: 1.05rem;
+            line-height: 1.7;
+            color: var(--text-dark);
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* Progress Bar */
+        .progress-container {
+            margin-top: 1rem;
+            background: var(--border);
+            border-radius: 8px;
+            overflow: hidden;
+            height: 8px;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            border-radius: 8px;
+            transition: width 0.3s ease;
+            animation: shimmer 2s infinite;
+        }
+
+        @keyframes shimmer {
+            0% {
+                background-position: -200% 0;
+            }
+            100% {
+                background-position: 200% 0;
+            }
+        }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            margin-top: 3rem;
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 0.9rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+
+            h1 {
+                font-size: 2rem;
+            }
+
+            .main-card {
+                padding: 1.5rem;
+            }
+
+            .upload-zone {
+                padding: 2rem 1rem;
+            }
+
+            .btn-secondary {
+                margin-left: 0;
+                margin-top: 0.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <div class="logo">
+                <img src="https://data-analysis-platform-frontend-360783618622.s3.eu-central-1.amazonaws.com/CloudDora+Logo+1.png" alt="CloudDora Logo">
+            </div>
+            <h1>CloudDora Data Insights Platform</h1>
+            <p class="subtitle">AI-Powered Business Intelligence with Claude by Anthropic</p>
+        </div>
+
+        <!-- Main Card -->
+        <div class="main-card">
+            <!-- Upload Zone -->
+            <div class="upload-zone" id="uploadZone">
+                <div class="upload-icon">📊</div>
+                <p class="upload-text">Drop your CSV file here or click to browse</p>
+                <p class="upload-subtext">Supports CSV files up to 10MB</p>
+                <input type="file" id="fileInput" accept=".csv,.json" />
+            </div>
+
+            <!-- File Info -->
+            <div id="fileInfoContainer"></div>
+
+            <!-- Status -->
+            <div id="statusContainer"></div>
+
+            <!-- Action Buttons -->
+            <div id="actionButtons" style="margin-top: 1.5rem; text-align: center; display: none;">
+                <button class="btn" id="uploadBtn">
+                    <span>🚀 Upload & Analyze</span>
+                </button>
+                <button class="btn btn-secondary" id="resetBtn">
+                    <span>🔄 Start Over</span>
+                </button>
+            </div>
+
+            <!-- Progress -->
+            <div id="progressContainer" style="display: none;">
+                <div class="progress-container">
+                    <div class="progress-bar" id="progressBar" style="width: 0%"></div>
+                </div>
+            </div>
+
+            <!-- Insights -->
+            <div id="insightsContainer"></div>
+        </div>
+
+        <!-- Footer -->
+        <div class="footer">
+            <p>Powered by AWS Serverless Architecture & Claude AI by Anthropic | CloudDora © 2025</p>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'https://92qpzz5se3.execute-api.eu-central-1.amazonaws.com/prod';
+        
+        let selectedFile = null;
+        let uploadId = null;
+
+        const uploadZone = document.getElementById('uploadZone');
+        const fileInput = document.getElementById('fileInput');
+        const fileInfoContainer = document.getElementById('fileInfoContainer');
+        const statusContainer = document.getElementById('statusContainer');
+        const actionButtons = document.getElementById('actionButtons');
+        const uploadBtn = document.getElementById('uploadBtn');
+        const resetBtn = document.getElementById('resetBtn');
+        const progressContainer = document.getElementById('progressContainer');
+        const progressBar = document.getElementById('progressBar');
+        const insightsContainer = document.getElementById('insightsContainer');
+
+        // Upload zone click
+        uploadZone.addEventListener('click', () => {
+            fileInput.click();
+        });
+
+        // File input change
+        fileInput.addEventListener('change', (e) => {
+            handleFile(e.target.files[0]);
+        });
+
+        // Drag and drop
+        uploadZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadZone.classList.add('dragover');
+        });
+
+        uploadZone.addEventListener('dragleave', () => {
+            uploadZone.classList.remove('dragover');
+        });
+
+        uploadZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadZone.classList.remove('dragover');
+            handleFile(e.dataTransfer.files[0]);
+        });
+
+        // Handle file selection
+        function handleFile(file) {
+            if (!file) return;
+
+            // Validate file type
+            const validTypes = ['text/csv', 'application/json', 'text/plain'];
+            if (!validTypes.includes(file.type) && !file.name.endsWith('.csv') && !file.name.endsWith('.json')) {
+                showStatus('Please select a CSV or JSON file', 'error');
+                return;
+            }
+
+            // Validate file size (10MB)
+            if (file.size > 10 * 1024 * 1024) {
+                showStatus('File size must be less than 10MB', 'error');
+                return;
+            }
+
+            selectedFile = file;
+            displayFileInfo(file);
+            actionButtons.style.display = 'block';
+            statusContainer.innerHTML = '';
+            insightsContainer.innerHTML = '';
+        }
+
+        // Display file info
+        function displayFileInfo(file) {
+            const sizeKB = (file.size / 1024).toFixed(2);
+            fileInfoContainer.innerHTML = `
+                <div class="file-info">
+                    <div class="file-name">
+                        <span>📄</span>
+                        <span>${file.name}</span>
+                    </div>
+                    <div class="file-size">${sizeKB} KB</div>
+                </div>
+            `;
+        }
+
+        // Show status
+        function showStatus(message, type = 'loading') {
+            const spinner = type === 'loading' ? '<span class="spinner"></span>' : '';
+            statusContainer.innerHTML = `
+                <div class="status ${type}">
+                    ${spinner}${message}
+                </div>
+            `;
+        }
+
+        // Update progress
+        function updateProgress(percent) {
+            progressBar.style.width = percent + '%';
+        }
+
+        // Upload and analyze
+        uploadBtn.addEventListener('click', async () => {
+            if (!selectedFile) return;
+
+            uploadBtn.disabled = true;
+            progressContainer.style.display = 'block';
+            updateProgress(10);
+
+            try {
+                // Step 1: Upload file
+                showStatus('Uploading file...', 'loading');
+                updateProgress(30);
+
+                const fileContent = await readFileAsBase64(selectedFile);
+                
+                const uploadResponse = await fetch(`${API_BASE}/upload`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        fileName: selectedFile.name,
+                        fileType: selectedFile.type || 'text/csv',
+                        fileContent: fileContent
+                    })
+                });
+
+                if (!uploadResponse.ok) {
+                    throw new Error('Upload failed');
+                }
+
+                const uploadData = await uploadResponse.json();
+                uploadId = uploadData.upload_id;
+                
+                updateProgress(60);
+                showStatus('Processing data...', 'loading');
+
+                // Wait for processing
+                await new Promise(resolve => setTimeout(resolve, 3000));
+                
+                updateProgress(80);
+                showStatus('Analyzing with Claude AI...', 'loading');
+
+                // Step 2: Get AI insights
+                const s3Key = uploadData.s3_key.replace('raw/', 'processed/');
+                
+                const analyzeResponse = await fetch(`${API_BASE}/analyze`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        s3_key: s3Key,
+                        upload_id: uploadId
+                    })
+                });
+
+                if (!analyzeResponse.ok) {
+                    throw new Error('Analysis failed');
+                }
+
+                const analyzeData = await analyzeResponse.json();
+                
+                updateProgress(100);
+                showStatus('Analysis complete! ✨', 'success');
+                
+                // Display insights
+                displayInsights(analyzeData.insights);
+                
+            } catch (error) {
+                console.error('Error:', error);
+                showStatus('❌ Error: ' + error.message, 'error');
+                updateProgress(0);
+            } finally {
+                uploadBtn.disabled = false;
+                setTimeout(() => {
+                    progressContainer.style.display = 'none';
+                    updateProgress(0);
+                }, 2000);
+            }
+        });
+
+        // Read file as base64
+        function readFileAsBase64(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = () => {
+                    const base64 = reader.result.split(',')[1];
+                    resolve(base64);
+                };
+                reader.onerror = reject;
+                reader.readAsDataURL(file);
+            });
+        }
+
+        // Display insights
+        function displayInsights(insights) {
+            insightsContainer.innerHTML = `
+                <div class="insights">
+                    <div class="insights-header">
+                        <h2>🤖 Claude AI Insights</h2>
+                        <span class="badge">by Anthropic</span>
+                    </div>
+
+                    <div class="insight-card">
+                        <h3>📋 Summary</h3>
+                        <p class="summary-text">${insights.summary}</p>
+                    </div>
+
+                    <div class="insight-card">
+                        <h3>💡 Key Insights</h3>
+                        <ul class="insight-list">
+                            ${insights.key_insights.map(insight => `<li>${insight}</li>`).join('')}
+                        </ul>
+                    </div>
+
+                    <div class="insight-card">
+                        <h3>✅ Data Quality</h3>
+                        <p class="summary-text">${insights.data_quality}</p>
+                    </div>
+
+                    <div class="insight-card">
+                        <h3>🎯 Recommendations</h3>
+                        <ul class="insight-list">
+                            ${insights.recommendations.map(rec => `<li>${rec}</li>`).join('')}
+                        </ul>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Reset
+        resetBtn.addEventListener('click', () => {
+            selectedFile = null;
+            uploadId = null;
+            fileInput.value = '';
+            fileInfoContainer.innerHTML = '';
+            statusContainer.innerHTML = '';
+            insightsContainer.innerHTML = '';
+            actionButtons.style.display = 'none';
+            progressContainer.style.display = 'none';
+            updateProgress(0);
+        });
+    </script>
+</body>
+</html>
